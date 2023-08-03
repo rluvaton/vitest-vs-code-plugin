@@ -107,3 +107,4 @@ yarn.lock
 *.vsix
 
 .DS_Store
+.idea

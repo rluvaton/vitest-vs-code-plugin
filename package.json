@@ -1,12 +1,12 @@
 {
-  "name": "vscode-vitest-runner",
-  "displayName": "Vitest Runner",
-  "version": "0.0.4",
+  "name": "vscode-vitest",
+  "displayName": "Vitest Runner for VSCode that actually work",
+  "version": "0.0.1",
   "main": "dist/index.js",
   "icon": "logo.png",
   "license": "MIT",
-  "description": "Vitest case runner.",
-  "publisher": "kingwl",
+  "description": "Vitest Runner for VSCode that actually work",
+  "publisher": "rluvaton",
   "engines": {
     "vscode": "^1.65.0"
   },
@@ -19,8 +19,8 @@
     "runner",
     "codelens"
   ],
-  "repository": "git@github.com:kwai-explore/vscode-vitest-runner.git",
-  "author": "kingwl <kingwenlu@gmail.com>",
+  "repository": "https://github.com/rluvaton/vitest-vs-code-plugin.git",
+  "author": "Raz Luvaton",
   "activationEvents": [
     "onLanguage:typescript",
     "onLanguage:javascript",

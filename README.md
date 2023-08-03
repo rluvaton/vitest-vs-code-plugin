@@ -1,5 +1,7 @@
-# vscode-vitest-runner
+# vscode-vitest
 
-Run your test case by vitest.
+Vitest runner for vscode that actually works
 
-![preview](https://github.com/kwai-explore/vscode-vitest-runner/blob/main/docs/preview.png?raw=true)
+Supports:
+- 
+![preview](https://github.com/rluvaton/vitest-vs-code-plugin/blob/main/docs/preview.png?raw=true)
