@@ -19,7 +19,7 @@ function buildVitestArgs({ caseName, casePath, sanitize = true }: { caseName: st
         caseName = JSON.stringify(caseName);
     }
 
-    const args = ['vitest', 'run', '-t', caseName, sanitizedCasePath];
+    const args = ['vitest', 'run', '--testNamePattern', caseName, sanitizedCasePath];
 
     const rootDir = getCwd(casePath);
     if (rootDir) {
@@ -31,7 +31,11 @@ function buildVitestArgs({ caseName, casePath, sanitize = true }: { caseName: st
 
 let terminal: vscode.Terminal | undefined;
 
-export function runInTerminal(text: string, filename: string) {
+async function saveFile(filePath: string) {
+    await vscode.workspace.textDocuments.find((doc) => doc.fileName === filePath)?.save();
+}
+
+export async function runInTerminal(text: string, filename: string) {
     let terminalAlreadyExists = true;
     if (!terminal || terminal.exitStatus) {
         terminalAlreadyExists = false;
@@ -46,6 +50,8 @@ export function runInTerminal(text: string, filename: string) {
         // CTRL-C to stop the previous run
         terminal.sendText('\x03');
     }
+
+    await saveFile(filename);
 
     terminal.sendText(npxArgs.join(' '), true);
     terminal.show();
@@ -68,7 +74,9 @@ function buildDebugConfig(
     };
 }
 
-export function debugInTermial(text: string, filename: string) {
+export async function debugInTerminal(text: string, filename: string) {
     const config = buildDebugConfig(filename, text);
+
+    await saveFile(filename);
     vscode.debug.startDebugging(undefined, config);
 }
