@@ -2,14 +2,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+          "name": "Launch Extension",
           "args": [
             "--extensionDevelopmentPath=${workspaceFolder}",
             "${workspaceFolder}/tests"
           ],
-          "name": "Launch Extension",
           "outFiles": ["${workspaceFolder}/dist/**/*.js"],
           "request": "launch",
-          "type": "pwa-extensionHost"
+          "type": "extensionHost",
+          "preLaunchTask": "npm: build"
         }
     ]
 }
