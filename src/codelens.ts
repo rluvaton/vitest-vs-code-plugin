@@ -4,18 +4,14 @@ import { TextCase } from './types';
 import { flatMap } from './utils';
 import { RunVitestCommand, DebugVitestCommand } from './vscode';
 
-const caseText = new Set(['it', 'describe','test']);
+const caseText = new Set(['it', 'describe', 'test']);
 
 function tryGetVitestTestCase(
     typescript: typeof ts,
     callExpression: ts.CallExpression,
     file: ts.SourceFile
 ): TextCase | undefined {
-    if (!typescript.isIdentifier(callExpression.expression)) {
-        return undefined;
-    }
-
-    if (!caseText.has(callExpression.expression.text)) {
+    if (!isEach(typescript, callExpression) && !(typescript.isIdentifier(callExpression.expression) && caseText.has((callExpression.expression as ts.Identifier).text))) {
         return undefined;
     }
 
@@ -39,8 +35,20 @@ function tryGetVitestTestCase(
     };
 }
 
+function isEach(typescript: typeof ts, callExpression: ts.CallExpression) {
+    return (
+        typescript.isCallExpression(callExpression.expression) &&
+        typescript.isPropertyAccessExpression(callExpression.expression.expression) &&
+        typescript.isIdentifier(callExpression.expression.expression.expression) &&
+        typescript.isIdentifier(callExpression.expression.expression.name) &&
+        callExpression.expression.expression.name.text === 'each' &&
+        caseText.has(callExpression.expression.expression.expression.text)
+    );
+}
+
 export class CodeLensProvider implements vscode.CodeLensProvider {
-    constructor(private typescript: typeof ts) {}
+    constructor(private typescript: typeof ts) {
+    }
 
     provideCodeLenses(
         document: vscode.TextDocument,

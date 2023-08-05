@@ -9,3 +9,7 @@ describe('Test', () => {
 test("Test should work", () => {
     expect(42).toBe(42)
 })
+
+it.each([1])('test this %s', (s) => {
+    console.log(s);
+});
