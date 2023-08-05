@@ -13,3 +13,16 @@ test("Test should work", () => {
 it.each([1])('test this %s', (s) => {
     console.log(s);
 });
+
+// Should not have run vitest here
+function run() {
+    it('Should not show the run test here', () => {
+        expect(42).toBe(42);
+    });
+}
+
+const r = () => {
+    it('Should not show the run test here', () => {
+        expect(42).toBe(42);
+    });
+};
