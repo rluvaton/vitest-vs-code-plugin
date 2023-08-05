@@ -37,7 +37,7 @@
   },
   "scripts": {
     "build": "esbuild ./src/index.ts  --bundle --outdir=dist --sourcemap --external:vscode --external:typescript --platform=node --format=cjs",
-    "build:watch": "npm run build -- --watch",
+    "build:watch": "yarn build -- --watch",
     "package": "yarn build && yarn vsce package",
     "format:check": "prettier --config ./prettier.config.json --c ./src/**/*.ts",
     "format:write": "yarn format:check --write"
