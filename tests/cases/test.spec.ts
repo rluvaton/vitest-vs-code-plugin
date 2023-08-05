@@ -9,3 +9,16 @@ describe('Test', () => {
 test("Test should work", () => {
     expect(42).toBe(42)
 })
+
+// Should not have run vitest here
+function run() {
+    it('Should not show the run test here', () => {
+        expect(42).toBe(42);
+    });
+}
+
+const r = () => {
+    it('Should not show the run test here', () => {
+        expect(42).toBe(42);
+    });
+};
