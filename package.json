@@ -1,7 +1,7 @@
 {
   "name": "vscode-vitest",
   "displayName": "Vitest Runner for VSCode that actually work",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "dist/index.js",
   "icon": "logo.png",
   "license": "MIT",
@@ -32,7 +32,7 @@
     "esbuild": "^0.14.27",
     "prettier": "^2.6.0",
     "typescript": "^4.6.2",
-    "vitest": "^0.7.7",
+    "vitest": "^0.34.1",
     "vsce": "^2.7.0"
   },
   "scripts": {

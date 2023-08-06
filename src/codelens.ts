@@ -4,18 +4,15 @@ import { TextCase } from './types';
 import { flatMap } from './utils';
 import { RunVitestCommand, DebugVitestCommand } from './vscode';
 
-const caseText = new Set(['it', 'describe','test']);
+const caseText = new Set(['it', 'describe', 'test']);
 
 function tryGetVitestTestCase(
     typescript: typeof ts,
     callExpression: ts.CallExpression,
     file: ts.SourceFile
 ): TextCase | undefined {
-    if (!typescript.isIdentifier(callExpression.expression)) {
-        return undefined;
-    }
-
-    if (!caseText.has(callExpression.expression.text)) {
+    const each = isEach(typescript, callExpression);
+    if (!each && !(typescript.isIdentifier(callExpression.expression) && caseText.has((callExpression.expression as ts.Identifier).text))) {
         return undefined;
     }
 
@@ -32,15 +29,55 @@ function tryGetVitestTestCase(
         return undefined;
     }
 
+    let testNameText = testName.text;
+
+    const start = callExpression.getStart(file);
+    if (each) {
+        //
+        testNameText = testNameText
+            // From https://github.com/jestjs/jest/blob/0fd5b1c37555f485c56a6ad2d6b010a72204f9f6/packages/jest-each/src/table/array.ts#L15C32-L15C47
+            // (Did not find inside vitest source code)
+            .replace(/%[sdifjoOp#]/g, '.*')
+            // When using template string
+            .replace(/\$[a-zA-Z_0-9]+/g, '.*');
+    }
+
     return {
-        start: testName.getStart(file),
-        end: testName.getEnd(),
-        text: testName.text
+        start,
+        end: callExpression.getEnd(),
+        text: testNameText
     };
 }
 
+function isEach(typescript: typeof ts, callExpression: ts.CallExpression) {
+    return isEachWithArray(typescript, callExpression) || isEachWithTemplate(typescript, callExpression);
+}
+
+function isEachWithArray(typescript: typeof ts, callExpression: ts.CallExpression) {
+    return (
+        typescript.isCallExpression(callExpression.expression) &&
+        typescript.isPropertyAccessExpression(callExpression.expression.expression) &&
+        typescript.isIdentifier(callExpression.expression.expression.expression) &&
+        typescript.isIdentifier(callExpression.expression.expression.name) &&
+        callExpression.expression.expression.name.text === 'each' &&
+        caseText.has(callExpression.expression.expression.expression.text)
+    );
+}
+
+function isEachWithTemplate(typescript: typeof ts, callExpression: ts.CallExpression) {
+    return (
+        typescript.isTaggedTemplateExpression(callExpression.expression) &&
+        typescript.isPropertyAccessExpression(callExpression.expression.tag) &&
+        typescript.isIdentifier(callExpression.expression.tag.expression) &&
+        typescript.isIdentifier(callExpression.expression.tag.name) &&
+        callExpression.expression.tag.name.text === 'each' &&
+        caseText.has(callExpression.expression.tag.expression.text)
+    );
+}
+
 export class CodeLensProvider implements vscode.CodeLensProvider {
-    constructor(private typescript: typeof ts) {}
+    constructor(private typescript: typeof ts) {
+    }
 
     provideCodeLenses(
         document: vscode.TextDocument,
