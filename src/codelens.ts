@@ -16,6 +16,10 @@ function tryGetVitestTestCase(
         return undefined;
     }
 
+    if(isInsideFunctionDeceleration(typescript, callExpression)) {
+        return undefined;
+    }
+
     const args = callExpression.arguments;
     if (args.length < 2) {
         return undefined;
@@ -75,6 +79,17 @@ function isEachWithTemplate(typescript: typeof ts, callExpression: ts.CallExpres
     );
 }
 
+function isInsideFunctionDeceleration(typescript: typeof ts, callExpression: ts.CallExpression) {
+    let parent = callExpression.parent;
+    while(parent) {
+        if(typescript.isFunctionLike(parent)) {
+            return true;
+        }
+        parent = parent.parent;
+    }
+    return false;
+}
+
 export class CodeLensProvider implements vscode.CodeLensProvider {
     constructor(private typescript: typeof ts) {
     }
@@ -89,7 +104,8 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
         const sourceFile = ts.createSourceFile(
             'dummy',
             text,
-            ts.ScriptTarget.Latest
+            ts.ScriptTarget.Latest,
+            /* setParentNodes */ true,
         );
         const testCases: TextCase[] = [];
 

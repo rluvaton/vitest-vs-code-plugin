@@ -20,3 +20,16 @@ it.each`
 `('test this $va ccasacs', ({value}) => {
     console.log(value);
 });
+
+// Should not have run vitest here
+function run() {
+    it('Should not show the run test here', () => {
+        expect(42).toBe(42);
+    });
+}
+
+const r = () => {
+    it('Should not show the run test here', () => {
+        expect(42).toBe(42);
+    });
+};
