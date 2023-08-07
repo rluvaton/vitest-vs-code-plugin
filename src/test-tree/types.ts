@@ -1,5 +1,5 @@
 export interface BaseTestTreeNode {
-    name: string | symbol;
+    name: string;
     position: {
         start: number;
         end: number;
