@@ -163,7 +163,7 @@ describe('something', () => {
                 const code = `
 it.each\`
     value
-    ${1}
+    \${1}
 \`('test this $value hello', ({value}) => {
     console.log(value);
 });`;
@@ -175,19 +175,102 @@ it.each\`
                         name: "test this .* hello",
                         position: {
                             start: 1,
-                            end: 101
+                            end: 98
                         },
                         type: "test",
                     }
                 ])
             });
 
-            // TODO - add tests for test.each and describe each
+            it('test.each with array', () => {
+                const code = `test.each([1])("Test %s work", () => {
+    expect(42).toBe(42)
+});`;
+
+                const root = TestTreeBuilder.build(ts, code, new AbortController().signal);
+
+                expect(root).toEqual<TestTreeNode[]>([
+                    {
+                        name: "Test .* work",
+                        position: {
+                            start: 0,
+                            end: 65
+                        },
+                        type: "test",
+                    }
+                ])
+            });
+
+            it('test.each with template', () => {
+                const code = `
+test.each\`
+    value
+    \${1}
+\`('test this $value hello', ({value}) => {
+    console.log(value);
+});`;
+
+                const root = TestTreeBuilder.build(ts, code, new AbortController().signal);
+
+                expect(root).toEqual<TestTreeNode[]>([
+                    {
+                        name: "test this .* hello",
+                        position: {
+                            start: 1,
+                            end: 100
+                        },
+                        type: "test",
+                    }
+                ])
+            });
+
+            it('describe.each with array', () => {
+                const code = `describe.each([1])("Test %s work", () => {
+    expect(42).toBe(42)
+});`;
+
+                const root = TestTreeBuilder.build(ts, code, new AbortController().signal);
+
+                expect(root).toEqual<TestTreeNode[]>([
+                    {
+                        name: "Test .* work",
+                        type: "suite",
+                        position: {
+                            start: 0,
+                            end: 69
+                        },
+                        children: [],
+                    }
+                ])
+            });
+
+            it('describe.each with template', () => {
+                const code = `
+describe.each\`
+    value
+    \${1}
+\`('test this $value hello', ({value}) => {
+    console.log(value);
+});`;
+
+                const root = TestTreeBuilder.build(ts, code, new AbortController().signal);
+
+                expect(root).toEqual<TestTreeNode[]>([
+                    {
+                        name: "test this .* hello",
+                        type: "suite",
+                        position: {
+                            start: 1,
+                            end: 104
+                        },
+                        children: []
+                    }
+                ])
+            });
         });
     });
 
     it('should build complex test structure', () => {
-
         const code = `
 describe('my describe', () => {
     describe('sub', () => {
@@ -282,6 +365,5 @@ it.each\`
                 type: "test"
             }
         ])
-        console.log(root)
     });
 });

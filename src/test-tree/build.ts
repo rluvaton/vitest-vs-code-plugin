@@ -86,7 +86,6 @@ export class TestTreeBuilder {
             testType
         });
 
-
         let node: TS.Node = callExpression.parent;
         while (node && !this.testTreeNodes.get(node)) {
             node = node.parent;
