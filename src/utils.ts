@@ -1,4 +1,5 @@
 import * as path from 'path';
+import {CancellationToken} from "vscode";
 
 export function flatMap<T, U>(
     items: readonly T[],
@@ -21,4 +22,10 @@ export function getVscodeTypescriptPath(appRoot: string) {
         'lib',
         'typescript.js'
     );
+}
+
+export function convertCancellationTokenToAbortSignal(token: CancellationToken): AbortSignal {
+    const controller = new AbortController();
+    token.onCancellationRequested(() => controller.abort());
+    return controller.signal;
 }
