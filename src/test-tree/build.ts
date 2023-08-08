@@ -1,19 +1,30 @@
 import type * as TS from "typescript";
-import type {TestTreeNode} from "./types";
+import type { SuiteNode, TestNode, TestTreeNode } from "./types";
 
 const caseText = new Set(['it', 'describe', 'test']);
+
+interface listeners {
+    onTest: (test: TestNode) => any;
+    onSuite: (suite: SuiteNode) => any;
+}
 
 export class TestTreeBuilder {
     private sourceFile: TS.SourceFile;
     private ts: typeof TS;
     private abortSignal: AbortSignal;
 
+    private onTest: listeners['onTest'];
+    private onSuite: listeners['onSuite'];
+
     private rootTestTreeNodes: TestTreeNode[] = [];
     private testTreeNodes = new WeakMap<TS.Node, TestTreeNode>();
 
-    private constructor(ts: typeof TS, codeContent: string, abortSignal: AbortSignal) {
+    private constructor(ts: typeof TS, codeContent: string, abortSignal: AbortSignal, listeners: Partial<listeners>) {
         this.ts = ts;
         this.abortSignal = abortSignal;
+
+        this.onSuite = listeners.onSuite || (() => { });
+        this.onTest = listeners.onTest || (() => { });
 
         this.sourceFile = ts.createSourceFile(
             'dummy',
@@ -23,8 +34,8 @@ export class TestTreeBuilder {
         );
     }
 
-    static build(ts: typeof TS, codeContent: string, abortSignal: AbortSignal): TestTreeNode[] {
-        const builder = new TestTreeBuilder(ts, codeContent, abortSignal);
+    static build(ts: typeof TS, codeContent: string, abortSignal: AbortSignal, listeners: Partial<listeners> = {}): TestTreeNode[] {
+        const builder = new TestTreeBuilder(ts, codeContent, abortSignal, listeners);
         return builder.build();
     }
 
@@ -85,6 +96,19 @@ export class TestTreeBuilder {
             end: callExpression.getEnd(),
             testType
         });
+
+        switch (newTestNode.type) {
+            case 'suite':
+                this.onSuite(newTestNode);
+                break;
+            case 'test':
+                this.onTest(newTestNode);
+                break;
+        }
+
+        if(this.abortSignal.aborted) {
+            return;
+        }
 
         let node: TS.Node = callExpression.parent;
         while (node && !this.testTreeNodes.get(node)) {
@@ -165,7 +189,7 @@ interface TreeNode {
     testType: TestTreeNode["type"];
 }
 
-function getTreeNode({testNameText, start, end, testType}: TreeNode): TestTreeNode {
+function getTreeNode({ testNameText, start, end, testType }: TreeNode): TestTreeNode {
     const data = {
         name: testNameText,
         position: {
@@ -175,7 +199,7 @@ function getTreeNode({testNameText, start, end, testType}: TreeNode): TestTreeNo
         type: testType,
     } as TestTreeNode;
 
-    if(data.type === 'suite') {
+    if (data.type === 'suite') {
         data.children = [];
     }
 
