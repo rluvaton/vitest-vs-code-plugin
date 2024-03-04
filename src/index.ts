@@ -4,7 +4,7 @@ import { TestCase, testData, TestFile } from './test-tree/sample';
 import { TestTreeBuilder } from './test-tree/build';
 
 export async function activate(context: vscode.ExtensionContext) {
-    const ctrl = vscode.tests.createTestController('mathTestController', 'Markdown Math');
+    const ctrl = vscode.tests.createTestController('vitestTestController', 'Vitest');
     context.subscriptions.push(ctrl);
 
     const fileChangedEmitter = new vscode.EventEmitter<vscode.Uri>();
@@ -92,7 +92,7 @@ export async function activate(context: vscode.ExtensionContext) {
         if (e.uri.scheme !== 'file') {
             return;
         }
-        
+
         const ac = new AbortController();
 
         // TODO - in the future we should check if file match the test pattern in the vitest config
@@ -153,6 +153,7 @@ function getWorkspaceTestPatterns() {
 
     return vscode.workspace.workspaceFolders.map(workspaceFolder => ({
         workspaceFolder,
+        // TODO - ADD SUPPORT FOR js AND spec AND tsx
         pattern: new vscode.RelativePattern(workspaceFolder, '**/*.test.ts'),
     }));
 }

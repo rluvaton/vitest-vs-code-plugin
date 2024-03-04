@@ -3,6 +3,7 @@ import { describe, it, test, expect } from 'vitest';
 describe('Test', () => {
     describe('sub', () => {
         it('sub test 1', () => {
+            throw new Error('test');
             expect(1 + 41).toBe(42);
         });
     });
