@@ -1,7 +1,7 @@
 import type * as ts from 'typescript';
 import * as vscode from 'vscode';
 import {convertCancellationTokenToAbortSignal} from './utils';
-import {DebugVitestCommand, RunVitestCommand} from './vscode';
+import {DebugVitestCommand, RunVitestCommand, WatchVitestCommand} from './vscode';
 import {TestTreeBuilder} from "./test-tree/build";
 import {TestTreeNode} from './test-tree/types';
 
@@ -32,6 +32,10 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
                     new DebugVitestCommand(testNode.name, document.fileName)
+                ),
+                new vscode.CodeLens(
+                    new vscode.Range(start, end),
+                    new WatchVitestCommand(testNode.name, document.fileName)
                 )
             ];
         });
