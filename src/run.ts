@@ -3,6 +3,8 @@ import * as path from 'path';
 import * as findUp from 'find-up';
 import { configFiles } from './vitest-config-files';
 
+const config = vscode.workspace.getConfiguration('vscode-vitest');
+
 function getCwd(testFile: string) {
     const configFilePath = findUp.sync(configFiles, { cwd: testFile });
 
@@ -12,14 +14,17 @@ function getCwd(testFile: string) {
     return path.dirname(configFilePath);
 }
 
-function buildVitestArgs({ caseName, casePath, sanitize = true, command = 'run' }: { caseName: string, casePath: string, sanitize?: boolean, command?: 'run' | 'watch' }) {
+function buildVitestArgs({ caseName, casePath, sanitize = true, testMode = 'run' }: { caseName: string, casePath: string, sanitize?: boolean, testMode?: 'run' | 'watch' }) {
+    
     let sanitizedCasePath = casePath;
     if (sanitize) {
         sanitizedCasePath = JSON.stringify(casePath);
         caseName = JSON.stringify(caseName);
     }
 
-    const args = ['vitest', command, '--testNamePattern', caseName, sanitizedCasePath];
+    const testCommand = config.get("testCommand")
+
+    const args = [testCommand, testMode, '--testNamePattern', caseName, sanitizedCasePath];
 
     const rootDir = getCwd(casePath);
     if (rootDir) {
@@ -35,7 +40,7 @@ async function saveFile(filePath: string) {
     await vscode.workspace.textDocuments.find((doc) => doc.fileName === filePath)?.save();
 }
 
-export async function runInTerminal(text: string, filename: string) {
+export async function executeInTerminal(text: string, filename: string, testMode: "run" | "watch" = "run") {
     let terminalAlreadyExists = true;
     if (!terminal || terminal.exitStatus) {
         terminalAlreadyExists = false;
@@ -43,8 +48,13 @@ export async function runInTerminal(text: string, filename: string) {
         terminal = vscode.window.createTerminal(`vscode-vitest-runner`);
     }
 
-    const vitestArgs = buildVitestArgs({ caseName: text, casePath: filename });
-    const npxArgs = ['npx', ...vitestArgs];
+    const pretest = (config.get("pretest") as string[]);
+    const finalPretest = pretest.length > 0 ? [`${pretest.join("; ")};`] : []
+    const packageManager = config.get("packageManager")
+    const extraArguments = config.get("extraArguments")
+
+    const vitestArgs = buildVitestArgs({ caseName: text, casePath: filename, testMode });
+    const commandToRun = [...finalPretest, packageManager, ...vitestArgs, extraArguments];
 
     if (terminalAlreadyExists) {
         // CTRL-C to stop the previous run
@@ -53,29 +63,7 @@ export async function runInTerminal(text: string, filename: string) {
 
     await saveFile(filename);
 
-    terminal.sendText(npxArgs.join(' '), true);
-    terminal.show();
-}
-
-export async function watchInTerminal(text: string, filename: string) {
-    let terminalAlreadyExists = true;
-    if (!terminal || terminal.exitStatus) {
-        terminalAlreadyExists = false;
-        terminal?.dispose();
-        terminal = vscode.window.createTerminal(`vscode-vitest-runner`);
-    }
-
-    const vitestArgs = buildVitestArgs({ command: 'watch', caseName: text, casePath: filename });
-    const npxArgs = ['npx', ...vitestArgs];
-
-    if (terminalAlreadyExists) {
-        // CTRL-C to stop the previous run
-        terminal.sendText('\x03');
-    }
-
-    await saveFile(filename);
-
-    terminal.sendText(npxArgs.join(' '), true);
+    terminal.sendText(commandToRun.join(' '), true);
     terminal.show();
 }
 
@@ -83,12 +71,14 @@ function buildDebugConfig(
     casePath: string,
     text: string
 ): vscode.DebugConfiguration {
+    const packageManager = config.get("packageManager")
+
     return {
         name: 'Debug vitest case',
         request: 'launch',
         runtimeArgs: buildVitestArgs({ caseName: text, casePath: casePath, sanitize: false }),
         cwd: getCwd(casePath) || path.dirname(casePath),
-        runtimeExecutable: 'npx',
+        runtimeExecutable: packageManager,
         skipFiles: ['<node_internals>/**'],
         type: 'pwa-node',
         console: 'integratedTerminal',

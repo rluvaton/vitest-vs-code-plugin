@@ -5,6 +5,8 @@ import {DebugVitestCommand, RunVitestCommand, WatchVitestCommand} from './vscode
 import {TestTreeBuilder} from "./test-tree/build";
 import {TestTreeNode} from './test-tree/types';
 
+const config = vscode.workspace.getConfiguration('vscode-vitest');
+
 export class CodeLensProvider implements vscode.CodeLensProvider {
     constructor(private typescript: typeof ts) {
     }
@@ -24,19 +26,33 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             const start = document.positionAt(testNode.position.start);
             const end = document.positionAt(testNode.position.end);
 
-            return [
+            const executableOptions: string[] = config.get("executableOptions") ?? []
+
+            const runCommand = executableOptions.includes("run") ? [
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
                     new RunVitestCommand(testNode.name, document.fileName)
-                ),
+                )
+            ] : []
+
+            const debugCommand = executableOptions.includes("debug") ? [
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
                     new DebugVitestCommand(testNode.name, document.fileName)
-                ),
+                )
+            ] : []
+
+            const watchCommand = executableOptions.includes("watch") ? [ 
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
                     new WatchVitestCommand(testNode.name, document.fileName)
                 )
+            ] : []
+
+            return [
+                ...runCommand,
+                ...debugCommand,
+                ...watchCommand,
             ];
         });
     }
