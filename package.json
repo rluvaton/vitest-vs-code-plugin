@@ -57,6 +57,14 @@
           "default": [],
           "description": "Command to run before tests run. e.g npm run preTest"
         },
+        "vscode-vitest.postTest": {
+          "type": ["array"],
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Command to run after tests run. e.g npm run cleanAfterTest"
+        },
         "vscode-vitest.packageManager": {
           "type": "string",
           "default": "npx",

@@ -47,13 +47,17 @@ export async function executeInTerminal(text: string, filename: string, testMode
         terminal = vscode.window.createTerminal(`vscode-vitest-runner`);
     }
 
-    const pretest = (config.get("pretest") as string[]);
-    const finalPretest = pretest.length > 0 ? [`${pretest.join("; ")};`] : []
+    const preTest = (config.get("preTest") as string[]);
+    const finalPreTest = preTest.length > 0 ? [`${preTest.join(" && ")} && `] : []
+
+    const postTest = (config.get("postTest") as string[]);
+    const finalPostTest = postTest.length > 0 ? [` && ${preTest.join(" && ")}`] : []
+    
     const packageManager = config.get("packageManager")
     const extraArguments = config.get("extraArguments")
 
     const vitestArgs = buildVitestArgs({ caseName: text, casePath: filename, testMode });
-    const commandToRun = [...finalPretest, packageManager, ...vitestArgs, extraArguments];
+    const commandToRun = [...finalPreTest, packageManager, ...vitestArgs, extraArguments, finalPostTest];
 
     if (terminalAlreadyExists) {
         // CTRL-C to stop the previous run
