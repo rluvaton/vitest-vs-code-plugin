@@ -15,7 +15,6 @@ function getCwd(testFile: string) {
 }
 
 function buildVitestArgs({ caseName, casePath, sanitize = true, testMode = 'run' }: { caseName: string, casePath: string, sanitize?: boolean, testMode?: 'run' | 'watch' }) {
-    
     let sanitizedCasePath = casePath;
     if (sanitize) {
         sanitizedCasePath = JSON.stringify(casePath);

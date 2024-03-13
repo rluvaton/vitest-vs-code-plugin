@@ -49,13 +49,13 @@
     "configuration": {
       "title": "Vitest Runner Configuration",
       "properties": {
-        "vscode-vitest.pretest": {
+        "vscode-vitest.preTest": {
           "type": ["array"],
           "items": {
             "type": "string"
           },
           "default": [],
-          "description": "Command to run before tests run. e.g npm run pretest"
+          "description": "Command to run before tests run. e.g npm run preTest"
         },
         "vscode-vitest.packageManager": {
           "type": "string",
@@ -73,11 +73,29 @@
           "description": "Extra arguments to run the test. e.g --maxWorkers --silent"
         },
         "vscode-vitest.executableOptions": {
-          "type": "array",
-          "items": {
-            "type": "string"
+          "type": "object",
+          "default": {
+            "run": true,
+            "watch": true,
+            "debug": true
           },
-          "default": ["run", "debug", "watch"],
+          "properties": {
+            "run": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable or disable Run(Vitest)"
+            },
+            "watch": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable or disable Watch(Vitest)"
+            },
+            "debug": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable or disable Debug(Vitest)."
+            }
+          },
           "description": "Choose which executable options to enable"
         }
       }

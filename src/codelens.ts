@@ -5,6 +5,12 @@ import {DebugVitestCommand, RunVitestCommand, WatchVitestCommand} from './vscode
 import {TestTreeBuilder} from "./test-tree/build";
 import {TestTreeNode} from './test-tree/types';
 
+interface ExecutableOptions {
+    run: boolean;
+    watch: boolean;
+    debug: boolean;
+}
+
 const config = vscode.workspace.getConfiguration('vscode-vitest');
 
 export class CodeLensProvider implements vscode.CodeLensProvider {
@@ -26,23 +32,27 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             const start = document.positionAt(testNode.position.start);
             const end = document.positionAt(testNode.position.end);
 
-            const executableOptions: string[] = config.get("executableOptions") ?? []
+            const executableOptions: ExecutableOptions = config.get("executableOptions") ??  {
+                run: true,
+                watch: true,
+                debug: true,
+            }
 
-            const runCommand = executableOptions.includes("run") ? [
+            const runCommand = executableOptions.run ? [
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
                     new RunVitestCommand(testNode.name, document.fileName)
                 )
             ] : []
 
-            const debugCommand = executableOptions.includes("debug") ? [
+            const debugCommand = executableOptions.debug ? [
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
                     new DebugVitestCommand(testNode.name, document.fileName)
                 )
             ] : []
 
-            const watchCommand = executableOptions.includes("watch") ? [ 
+            const watchCommand = executableOptions.watch ? [ 
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
                     new WatchVitestCommand(testNode.name, document.fileName)
