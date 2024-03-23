@@ -57,7 +57,7 @@ export async function executeInTerminal(text: string, filename: string, testMode
     const extraArguments = config.get("extraArguments")
 
     const vitestArgs = buildVitestArgs({ caseName: text, casePath: filename, testMode });
-    const commandToRun = [...finalPreTest, packageManager, ...vitestArgs, extraArguments, finalPostTest];
+    const commandToRun = [...finalPreTest, packageManager, ...vitestArgs, extraArguments, ...finalPostTest];
 
     if (terminalAlreadyExists) {
         // CTRL-C to stop the previous run
