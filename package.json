@@ -1,7 +1,7 @@
 {
   "name": "vscode-vitest",
   "displayName": "Vitest Runner for VSCode that actually work",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "main": "dist/index.js",
   "icon": "logo.png",
   "license": "MIT",
@@ -44,5 +44,69 @@
   },
   "dependencies": {
     "find-up": "^5.0.0"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Vitest Runner Configuration",
+      "properties": {
+        "vscode-vitest.preTest": {
+          "type": ["array"],
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Command to run before tests run. e.g npm run preTest"
+        },
+        "vscode-vitest.postTest": {
+          "type": ["array"],
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Command to run after tests run. e.g npm run cleanAfterTest"
+        },
+        "vscode-vitest.packageManager": {
+          "type": "string",
+          "default": "npx",
+          "description": "Command to run tests. e.g npm, pnpm, npx, yarn"
+        },
+        "vscode-vitest.testCommand": {
+          "type": "string",
+          "default": "vitest",
+          "description": "Command to run tests. e.g test, vitest"
+        },
+        "vscode-vitest.extraArguments": {
+          "type": "string",
+          "default": "",
+          "description": "Extra arguments to run the test. e.g --maxWorkers --silent"
+        },
+        "vscode-vitest.executableOptions": {
+          "type": "object",
+          "default": {
+            "run": true,
+            "watch": true,
+            "debug": true
+          },
+          "properties": {
+            "run": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable or disable Run(Vitest)"
+            },
+            "watch": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable or disable Watch(Vitest)"
+            },
+            "debug": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable or disable Debug(Vitest)."
+            }
+          },
+          "description": "Choose which executable options to enable"
+        }
+      }
+    }
   }
 }
