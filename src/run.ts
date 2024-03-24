@@ -51,7 +51,7 @@ export async function executeInTerminal(text: string, filename: string, testMode
     const finalPreTest = preTest.length > 0 ? [`${preTest.join(" && ")} && `] : []
 
     const postTest = (config.get("postTest") as string[]);
-    const finalPostTest = postTest.length > 0 ? [` && ${preTest.join(" && ")}`] : []
+    const finalPostTest = postTest.length > 0 ? [` && ${postTest.join(" && ")}`] : []
     
     const packageManager = config.get("packageManager")
     const extraArguments = config.get("extraArguments")
